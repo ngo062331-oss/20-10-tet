@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>20/10 — Gửi Tét</title>
+  
+  <!-- Font chữ Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <style>
+    :root {
+      --bg: #fbf9f6;
+      --card-bg: #ffffff;
+      --text-main: #2b2927;
+      --text-muted: #736e68;
+      --accent: #d96b52;
+      --accent-soft: #f4eae4;
+      --border: #e6e1da;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Music Control Button */
+    .music-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .music-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      transition: transform 0.3s ease;
+    }
+
+    .card-header {
+      margin-bottom: 24px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.3;
+    }
+
+    .date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .letter-preview {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .letter-preview:hover {
+      border-color: var(--accent);
+      background: #faf4f0;
+    }
+
+    .letter-preview p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .letter-content {
+      display: none;
+      font-size: 0.98rem;
+      color: var(--text-main);
+    }
+
+    .letter-content.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .letter-content p {
+      margin-bottom: 14px;
+    }
+
+    .letter-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .signature {
+      margin-top: 24px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--accent);
+      font-size: 1.1rem;
+      text-align: right;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Audio Player (Background Lofi) -->
+  <audio id="bg-music" loop preload="auto">
+    <source src="https://assets.mixkit.co/music/preview/mixkit-chill-bro-494.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Nút Bật/Tắt Nhạc -->
+  <button class="music-btn" id="music-toggle" onclick="toggleMusic()">
+    <span id="music-icon">🎵</span>
+    <span id="music-text">Bật nhạc</span>
+  </button>
+
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <span class="tag">Oct 20 Special</span>
+        <h1>Gửi Tét,</h1>
+        <div class="date">Ngày Phụ Nữ Việt Nam 20/10</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Preview mở thư -->
+      <div class="letter-preview" id="preview-box" onclick="openLetter()">
+        <p>✉️ Nhấn vào đây để mở thư</p>
+      </div>
+
+      <!-- Nội dung thư chính -->
+      <div class="letter-content" id="letter-box">
+        <p>Chúc mừng ngày 20/10 nhé Tét!</p>
+        <p>Chúc mày luôn vui vẻ, công việc suôn sẻ, tiền vào như nước và lúc nào cũng giữ được sự yêu đời, rạng rỡ như hiện tại.</p>
+        <p>Hôm nay cứ thong thả tận hưởng một ngày thật trọn vẹn và thoải mái nhé!</p>
+        
+        <div class="signature">— Tao</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let musicPlayed = false;
+    const audio = document.getElementById('bg-music');
+    const musicText = document.getElementById('music-text');
+
+    function openLetter() {
+      document.getElementById('preview-box').style.display = 'none';
+      document.getElementById('letter-box').classList.add('active');
+
+      if (!musicPlayed) {
+        playMusic();
+      }
+
+      confetti({
+        particleCount: 40,
+        spread: 60,
+        origin: { y: 0.7 },
+        colors: ['#d96b52', '#e6e1da', '#736e68']
+      });
+    }
+
+    function toggleMusic() {
+      if (audio.paused) {
+        playMusic();
+      } else {
+        audio.pause();
+        musicText.textContent = "Bật nhạc";
+      }
+    }
+
+    function playMusic() {
+      audio.play().then(() => {
+        musicPlayed = true;
+        musicText.textContent = "Tắt nhạc";
+      }).catch(err => {
+        console.log("Trình duyệt chặn tự động phát nhạc:", err);
+      });
+    }
+  </script>
+</body>
+</html>
